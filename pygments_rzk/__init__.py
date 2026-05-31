@@ -30,6 +30,7 @@ class RzkLexer(pygments.lexer.RegexLexer):
     tokens = {
         'root': [
             (r'--.*\n', Comment),
+            (r'\{-', Comment.Multiline, 'block-comment'),
             (r'^(#lang)(\s+)((?![-?!.])[^.\\;,#"\]\[)(}{><|\s]*)(?=$|[.\\;,#"\]\[)(}{><|\s])\s*$',
              bygroups(Name.Decorator, Punctuation, String)),
             (r'^(#check|#compute(-whnf|-nf)?|#set-option|#unset-option)(?=$|[.\\;,#"\]\[)(}{><|\s-])',
@@ -47,6 +48,9 @@ class RzkLexer(pygments.lexer.RegexLexer):
             (r'\blet\s+mod\b', Keyword),
             (r'\bmod\b', Name.Function),
 
+            # Special internal syntax: not for use in user code.
+            (r'\$extract\$', Generic.Error),
+
             # builtins
             (r'(^|(?<=[.\\;,#"\]\[)(}{><|\s]))(CUBE|TOPE|U(nit)?|𝒰)(?=$|[.\\;,#"\]\[)(}{><|\s])',
              Keyword.Type),
@@ -56,14 +60,16 @@ class RzkLexer(pygments.lexer.RegexLexer):
              String.Other),
             (r'(⊤|⊥|\*_1|\*₁|⋆)|(?<=[.\\;,#"\]\[)(}{><|\s])(0_2|0₂|1_2|1₂|TOP|BOT)(?=$|[.\\;,#"\]\[)(}{><|\s])',
              Number),
-            (r'(^|(?<=[.\\;,#"\]\[)(}{><|\s]))(recOR|recBOT|idJ|refl|first|second|π₁|π₂|unit)((?=$|[.\\;,#"\]\[)(}{><|\s])|(?=_{))',
+            (r'(^|(?<=[.\\;,#"\]\[)(}{><|\s]))(recOR|recBOT|idJ|refl|first|second|π₁|π₂|unit|uninvᵒᵖ|invᵒᵖ|unflipᵒᵖ|flipᵒᵖ|uninv_op|inv_op|unflip_op|flip_op)((?=$|[.\\;,#"\]\[)(}{><|\s])|(?=_{))',
              String),
             (r'(^|(?<=[.\\;,#"\]\[)(}{><|\s]))as(?=$|[.\\;,#"\]\[)(}{><|\s])',
              Keyword.Reserved),
             (r'\blet\b', Keyword),
+            (r'\bin\b', Keyword),
 
-            # modalities
-            (r'(♭|♯|ᵒᵖ)', Name.Decorator),
+            # modalities (Unicode + ASCII forms)
+            (r'(^|(?<=[.\\;,#"\]\[)(}{><|\s]))(_b|_#|_op|_id|♭|♯|ᵒᵖ)(?=$|[.\\;,#"\]\[)(}{><|\s])',
+             Name.Decorator),
 
             # parameters
             (r'(\(\s*)([^{:\)]+\s*)(:)(?=$|[.\\;,#"\]\[)(}{><|\s])',
@@ -73,6 +79,9 @@ class RzkLexer(pygments.lexer.RegexLexer):
 
             (r'(\\\s*)((([^→\t\n\r !"#\(\),-\.;:\\\/=<>\?\[\\\]\{\|\}][^\t\n\r !"#\(\),\.;:<>\?\[\\\]\{\|\}]*)\s*)+)',
                 bygroups(Punctuation, Text)),
+
+            # Hole identifier (placeholder term).
+            (r'\?', Name.Builtin.Pseudo),
 
             # Temporary catch-all: anything not matched above renders as plain
             # text instead of being tagged as Error (which Pygments styles
@@ -84,5 +93,11 @@ class RzkLexer(pygments.lexer.RegexLexer):
         'string': [
             (r'[^"]+', String),
             (r'"', String, '#pop'),
+        ],
+        # Non-nested block comments: `{- ... -}`.
+        'block-comment': [
+            (r'[^-}]+', Comment.Multiline),
+            (r'-\}', Comment.Multiline, '#pop'),
+            (r'[-}]', Comment.Multiline),
         ],
     }
