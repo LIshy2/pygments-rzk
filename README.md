@@ -18,6 +18,16 @@ pip install .     # install using pip
 
 To be done.
 
+### Use in Command Line (Terminal)
+
+You can simply pass text to `pygmentize -l rzk`, e.g.:
+
+```sh
+cat demo/demo.rzk | pygmentize -l rzk
+```
+
+![Rendering rzk code in the command line (demo).](images/command-line-demo.png)
+
 ### Use in LaTeX (via `minted`)
 
 In your LaTeX document:
@@ -28,40 +38,12 @@ In your LaTeX document:
 \package{minted}
 ```
 
-2. Use `minted` environment with `rzk` language, for example:
+2. Use `minted` environment with `rzk` language, for example (see [demo/demo.tex](demo/demo.tex) for full example):
 
 ```tex
-\begin{frame}[fragile]
-  \frametitle{\textsc{Rzk} highlighting in LaTeX with \texttt{minted}}
-
-A basic example:
-
-\tiny
 \begin{minted}[linenos,frame=leftline,mathescape]{rzk}
-#lang rzk-1
-
-#section path-algebra
-
-#variable A : U
-#variables x y z : A
-
--- path reversal
-#define rev uses (A x y)
-  (p : x = y)       -- A path from x to y in A.
-  : y = x           -- The reversal will be defined by path induction on p.
-  := idJ(A, x, \y' p' -> y' = x, refl, y, p)
-
--- path composition by induction on the second path
-#define concat
-  (p : x = y)       -- A path from x to y in A.
-  (q : y = z)       -- A path from y to z in A.
-  : (x = z)
-  := idJ(A, y, \z' q' -> (x = z'), p, z, q)
-
-#end path-algebra
+...
 \end{minted}
-
-\end{frame}
 ```
 
 ![Rendering rzk code in LaTeX (demo).](images/latex-highlighting-demo.png)
