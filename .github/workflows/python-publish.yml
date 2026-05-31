@@ -30,6 +30,12 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install build
+    - name: Rewrite relative image URLs in README for PyPI
+      env:
+        REPO: ${{ github.repository }}
+        REF:  ${{ github.event.release.tag_name }}
+      run: |
+        sed -i -E "s|\]\(images/|](https://raw.githubusercontent.com/${REPO}/${REF}/images/|g" README.md
     - name: Build package
       run: python -m build
     - name: Publish package
